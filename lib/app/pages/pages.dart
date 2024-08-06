@@ -1,0 +1,10 @@
+export 'initial/initial.dart';
+export 'onboarding/onboarding_view.dart';
+export 'user_info/user_info.dart';
+export 'home/home.dart';
+export 'account/views/account_view.dart';
+export 'meals/meals.dart';
+export 'result/results.dart';
+export 'account/account.dart';
+export 'nutrition_result/nutrition_result.dart';
+export 'history/history.dart';
