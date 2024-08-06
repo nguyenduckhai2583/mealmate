@@ -8,3 +8,4 @@ export 'src/widgets/default/scale_marker.dart';
 export 'src/widgets/default/value_view.dart';
 export 'src/widgets/numeric_ruler_scale_picker.dart';
 export 'src/widgets/ruler_scale_picker.dart';
+export 'src/widgets/ruler_area/latching_scroll_physics.dart';

@@ -1,45 +1,56 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mealmate/core.dart';
 
-class AgeSlider extends StatefulWidget {
-  const AgeSlider({
+import 'custom_slider.dart';
+
+class SliderIndicator extends StatefulWidget {
+  const SliderIndicator({
     super.key,
-    required this.initialWeight,
+    required this.initialValue,
+    required this.onChanged,
+    this.min = 1,
+    this.max = 100,
   });
 
-  final int initialWeight;
+  final int initialValue;
+  final int min;
+  final int max;
+  final Function(int val) onChanged;
 
   @override
-  State<AgeSlider> createState() => _AgeSliderState();
+  State<SliderIndicator> createState() => _SliderIndicatorState();
 }
 
-class _AgeSliderState extends State<AgeSlider> {
-  int weight = 2;
+class _SliderIndicatorState extends State<SliderIndicator> {
+  int value = 2;
 
   @override
   void initState() {
     super.initState();
-    //weight = widget.initialWeight;
+    value = widget.initialValue;
+  }
+
+  void _valueOnChanged(int val) {
+    setState(() {
+      value = val;
+    });
+
+    widget.onChanged(val);
   }
 
   @override
   Widget build(BuildContext context) {
     return WeightBackground(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return constraints.isTight
-              ? Container()
-              : WeightSlider(
-                  minValue: 1,
-                  maxValue: 100,
-                  value: weight,
-                  onChanged: (val) => setState(() => weight = val),
-                  width: constraints.maxWidth,
-                  itemInRow: 7,
-                );
-        },
-      ),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return CustomSlider(
+          minValue: widget.min,
+          maxValue: widget.max,
+          value: value,
+          onChanged: _valueOnChanged,
+          width: constraints.maxWidth,
+          itemInRow: 7,
+        );
+      }),
     );
   }
 }
@@ -54,23 +65,17 @@ class WeightBackground extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: context.colorScheme.primary, width: 2),
-            borderRadius: BorderRadius.circular(8),
-            color: context.colorScheme.surface,
-          ),
-          child: SizedBox(
-            height: 60,
-            child: child,
-          ),
+        Card(
+          elevation: 4,
+          child: SizedBox(height: 60, child: child),
         ),
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: context.colorScheme.primary.withOpacity(0.5),
+        IgnorePointer(
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: context.colorScheme.primary.withOpacity(0.5),
+            ),
           ),
         ),
       ],

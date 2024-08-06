@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:triller/app/core.dart';
+import 'package:mealmate/core.dart';
 
 class DefaultPadding extends StatelessWidget {
   const DefaultPadding({super.key, required this.child, this.bottom, this.top});

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class Space extends StatelessWidget {
   final Axis direction;
   final double value;
-  const Space({Key? key, this.direction = Axis.vertical, this.value = 8})
-      : super(key: key);
+  const Space({super.key, this.direction = Axis.vertical, this.value = 8});
   factory Space.vertical({double value = 8}) {
     return Space(direction: Axis.vertical, value: value);
   }

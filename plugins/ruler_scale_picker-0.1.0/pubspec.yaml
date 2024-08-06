@@ -3,9 +3,6 @@ description: A highly customisable, scrollable widget in a ruler-like style from
 homepage: https://pub.dev/publishers/cosee.biz/packages
 repository: https://github.com/cosee/ruler_scale_picker/tree/main
 issue_tracker: https://github.com/cosee/ruler_scale_picker/issues
-screenshots:
-  - description: 'Default appearance of NumericRulerScalePicker'
-    path: example/screenshots/default.webp
 topics:
   - ruler
   - scrollable

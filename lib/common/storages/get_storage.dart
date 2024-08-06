@@ -1,85 +1,21 @@
 import 'package:get_storage/get_storage.dart';
-import 'package:mealmate/core.dart';
 
-class Prefs {
+class GetStorageBox {
   GetStorage box = GetStorage();
 
-  static SharedPreferences? _prefs;
-  static Future<SharedPreferences?> load() async {
-    _prefs ??= await SharedPreferences.getInstance();
-    return _prefs;
-  }
+  void setData(String key, dynamic value) => GetStorage().write(key, value);
 
-  /// ----------------------------------------------------------
-  /// Method that read/saves bool
-  /// ----------------------------------------------------------
-  static Future<bool> saveBool(String key, bool value) async {
-    await load();
-    return _prefs!.setBool(key, value);
-  }
+  int getInt(String key, {int defaultVal = 0}) =>
+      GetStorage().read<int>(key) ?? defaultVal;
 
-  static bool getBool(String key, {bool defaultValue = false}) {
-    return _prefs!.getBool(key) ?? defaultValue;
-  }
+  String getString(String key, {String defaultVal = ""}) =>
+      GetStorage().read<String>(key) ?? defaultVal;
 
-  /// ----------------------------------------------------------
-  /// Method that read/saves int
-  /// ----------------------------------------------------------
-  static Future<bool> saveInt(String key, int value) async {
-    await load();
-    return _prefs!.setInt(key, value);
-  }
+  bool getBool(String key, {bool defaultVal = false}) =>
+      GetStorage().read<bool>(key) ?? defaultVal;
 
-  static int getInt(String key, {int defaultValue = 0}) {
-    return _prefs?.getInt(key) ?? defaultValue;
-  }
+  double getDouble(String key, {double defaultVal = 0}) =>
+      GetStorage().read<double>(key) ?? defaultVal;
 
-  /// ----------------------------------------------------------
-  /// Method that read/saves double
-  /// ----------------------------------------------------------
-  static Future<bool> saveDouble(String key, double value) async {
-    await load();
-    return _prefs!.setDouble(key, value);
-  }
-
-  static double getDouble(String key, {double defaultValue = 0}) {
-    return _prefs?.getDouble(key) ?? defaultValue;
-  }
-
-  /// ----------------------------------------------------------
-  /// Method that read/saves string
-  /// ----------------------------------------------------------
-  static Future<bool> saveString(String key, String value) async {
-    await load();
-    return _prefs!.setString(key, value);
-  }
-
-  static String getString(String key, {String defaultValue = ""}) {
-    return _prefs?.getString(key) ?? defaultValue;
-  }
-
-  /// ----------------------------------------------------------
-  /// Method that read/saves list string
-  /// ----------------------------------------------------------
-  static Future<bool> saveListString(String key, List<String> value) async {
-    await load();
-    return _prefs!.setStringList(key, value);
-  }
-
-  static List<String> getListString(String key) {
-    return _prefs?.getStringList(key) ?? [];
-  }
-
-  /// ----------------------------------------------------------
-  /// Method that clear all
-  /// ----------------------------------------------------------
-  static Future<bool> clear() async {
-    await load();
-    return _prefs!.clear();
-  }
-
-  static Future<bool> removeKey(String key) async {
-    await load();
-    return _prefs!.remove(key);
-  }
+  void clearData() async => GetStorage().erase();
 }

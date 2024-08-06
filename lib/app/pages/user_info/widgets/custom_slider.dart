@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:mealmate/core.dart';
 
-class WeightSlider extends StatelessWidget {
-  WeightSlider({
+class CustomSlider extends StatelessWidget {
+  CustomSlider({
     super.key,
     required this.minValue,
     required this.maxValue,
@@ -69,15 +69,15 @@ class WeightSlider extends StatelessWidget {
   }
 
   TextStyle? _getDefaultTextStyle(BuildContext context) {
-    return context.textTheme.titleLarge?.copyWith(
-      color: context.colorScheme.onBackground,
-      fontSize: 14,
+    return context.textTheme.titleMedium?.copyWith(
+      color: context.colorScheme.outline,
     );
   }
 
   TextStyle? _getHighlightTextStyle(BuildContext context) {
     return context.textTheme.titleLarge?.copyWith(
       color: context.colorScheme.primary,
+      fontWeight: FontWeight.w600,
     );
   }
 

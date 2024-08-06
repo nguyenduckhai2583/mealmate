@@ -4,36 +4,39 @@ import 'package:ruler_scale_picker/ruler_scale_picker.dart';
 
 const _initialHeight = 150;
 
-class HeightPickerView extends StatefulWidget {
-  const HeightPickerView({super.key});
+class HeightView extends StatefulWidget {
+  const HeightView({super.key});
 
   @override
-  State<HeightPickerView> createState() => _HeightPickerViewState();
+  State<HeightView> createState() => _HeightViewState();
 }
 
-class _HeightPickerViewState extends State<HeightPickerView> with HiveMixin {
-  late RulerScalePickerController<int> rulerController;
+class _HeightViewState extends State<HeightView> with HiveMixin {
+  RulerScalePickerController<int>? rulerController;
 
   UserInfo? userInfo;
   int currentVal = _initialHeight;
 
+  bool navigateBack = false;
+  bool loading = true;
+
   @override
   void initState() {
-    rulerController = NumericRulerScalePickerController(
-      firstValue: 20,
-      initialValue: currentVal,
-      lastValue: 300,
-      interval: 1,
-    );
-    rulerController.addListener(_listenValueChange);
+    _initRoute();
     _initHeight();
     super.initState();
   }
 
   @override
   void dispose() {
-    rulerController.removeListener(_listenValueChange);
+    rulerController?.removeListener(_listenValueChange);
     super.dispose();
+  }
+
+  void _initRoute() {
+    if (Get.arguments != null && Get.arguments is UserInfoInput) {
+      navigateBack = (Get.arguments as UserInfoInput).navigateBack;
+    }
   }
 
   void _initHeight() async {
@@ -42,13 +45,26 @@ class _HeightPickerViewState extends State<HeightPickerView> with HiveMixin {
       setState(() {
         currentVal = it;
       });
-      rulerController.setValue(currentVal);
+      rulerController?.setValue(currentVal);
     });
+
+    rulerController = NumericRulerScalePickerController(
+      firstValue: 20,
+      initialValue: currentVal,
+      lastValue: 300,
+      interval: 1,
+    );
+    rulerController?.addListener(_listenValueChange);
+    loading = false;
+
+    setState(() {});
   }
 
   void _listenValueChange() {
-    setState(() {
-      currentVal = rulerController.value;
+    rulerController?.value.ifNotNull((it) {
+      setState(() {
+        currentVal = it;
+      });
     });
   }
 
@@ -56,7 +72,11 @@ class _HeightPickerViewState extends State<HeightPickerView> with HiveMixin {
     userInfo?.setHeight(currentVal);
     saveUser(userInfo);
 
-    Get.toNamed(Routes.medicalCondition);
+    if (navigateBack) {
+      Get.back();
+    } else {
+      Get.toNamed(Routes.medicalCondition);
+    }
   }
 
   @override
@@ -86,7 +106,7 @@ class _HeightPickerViewState extends State<HeightPickerView> with HiveMixin {
             text: TextSpan(
               text: '$currentVal',
               style: context.textTheme.displayLarge?.copyWith(
-                fontSize: 64
+                fontSize: 64,
               ),
               children: <TextSpan>[
                 TextSpan(
@@ -105,6 +125,8 @@ class _HeightPickerViewState extends State<HeightPickerView> with HiveMixin {
   }
 
   Widget _buildRuler() {
+    if (loading) return const SizedBox();
+
     return NumericRulerScalePicker(
       controller: rulerController,
       scaleIndicatorBuilder: (

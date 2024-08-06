@@ -1,52 +1,48 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mealmate/core.dart';
 
-class WeightAgeView extends StatefulWidget {
-  const WeightAgeView({super.key});
+class MBIView extends StatefulWidget {
+  const MBIView({super.key});
 
   @override
-  State<WeightAgeView> createState() => _WeightAgeViewState();
+  State<MBIView> createState() => _MBIViewState();
 }
 
-class _WeightAgeViewState extends State<WeightAgeView> with HiveMixin {
+class _MBIViewState extends State<MBIView> with HiveMixin {
   int weight = 70;
   int age = 20;
   Gender? gender;
-
   UserInfo? userInfo;
+
+  bool navigateBack = false;
+  bool loading = true;
 
   @override
   void initState() {
+    _initRoute();
     _initData();
     super.initState();
   }
 
+  void _initRoute() {
+    if (Get.arguments != null && Get.arguments is UserInfoInput) {
+      navigateBack = (Get.arguments as UserInfoInput).navigateBack;
+    }
+  }
+
   Future<void> _initData() async {
     userInfo = await getUserInfo();
-    _initGender();
-    _initWeight();
-  }
-
-  void _initGender() {
-    setState(() {
-      gender = userInfo?.getGender();
-    });
-  }
-
-  void _initWeight() {
+    gender = userInfo?.getGender();
     userInfo?.getWeight().ifNotNull((it) {
-      setState(() {
-        weight = it;
-      });
+      weight = it;
     });
-  }
-
-  void initAge() {
     userInfo?.getAge().ifNotNull((it) {
-      setState(() {
-        age = it;
-      });
+      age = it;
+    });
+
+    loading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
     });
   }
 
@@ -62,13 +58,23 @@ class _WeightAgeViewState extends State<WeightAgeView> with HiveMixin {
     });
   }
 
+  void _ageOnChanged(int val) {
+    setState(() {
+      age = val;
+    });
+  }
+
   void _nextOnClicked() {
     userInfo?.setGender(gender);
     userInfo?.setWeight(weight);
     userInfo?.setAge(age);
     saveUser(userInfo);
 
-    Get.toNamed(Routes.height);
+    if (navigateBack) {
+      Get.back();
+    } else {
+      Get.toNamed(Routes.height);
+    }
   }
 
   @override
@@ -88,7 +94,7 @@ class _WeightAgeViewState extends State<WeightAgeView> with HiveMixin {
             Text(
               context.localization.gender,
               style: context.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
             const Space(),
@@ -99,29 +105,41 @@ class _WeightAgeViewState extends State<WeightAgeView> with HiveMixin {
                 Text(
                   context.localization.weight,
                   style: context.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   "kilogram",
                   style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.outline
+                    color: context.colorScheme.outline,
                   ),
                 ),
               ],
             ),
             const Space(),
-            const AgeSlider(initialWeight: 70),
+            if (!loading)
+              SliderIndicator(
+                key: const ValueKey("weight-slider"),
+                initialValue: weight,
+                onChanged: _weightOnChanged,
+                max: 200,
+              ),
             const Space(value: 32),
             Text(
               context.localization.age,
               style: context.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
             const Space(),
-            const AgeSlider(initialWeight: 70),
+            if (!loading)
+              SliderIndicator(
+                key: const ValueKey("age-slider"),
+                initialValue: age,
+                onChanged: _ageOnChanged,
+                max: 120,
+              ),
           ],
         ),
       ),
@@ -142,32 +160,39 @@ class _WeightAgeViewState extends State<WeightAgeView> with HiveMixin {
   }
 
   Widget _buildGenderItem(Gender gd) {
-    Color color =
-        gender == gd ? context.primaryColor : context.colorScheme.outline;
+    FontWeight fw;
+    Color color;
+
+    if (gender == gd) {
+      color = context.primaryColor;
+      fw = FontWeight.w600;
+    } else {
+      color = context.colorScheme.outline;
+      fw = FontWeight.w400;
+    }
 
     return InkWell(
       onTap: () => _setGender(gd),
       splashFactory: NoSplash.splashFactory,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(gd.getIcon(), size: 64, color: color),
-            const Space(value: 16),
-            Text(
-              gd.getTitle(context),
-              style: context.textTheme.titleMedium?.copyWith(
-                fontSize: 16,
-                color: color,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(gd.getIcon(), size: 64, color: color),
+              const Space(value: 16),
+              Text(
+                gd.getTitle(context),
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  color: color,
+                  fontWeight: fw,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

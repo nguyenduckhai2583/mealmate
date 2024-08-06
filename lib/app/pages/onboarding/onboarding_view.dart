@@ -49,8 +49,7 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
   }
 
   void _skipOnClicked() {
-    box.setData(AppKeys.isFirstLaunchAppKey, false);
-    _navigateToToHome();
+    _navigateToUserSetting();
   }
 
   void _nextOnClicked() {
@@ -64,8 +63,9 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
     }
   }
 
-  void _navigateToToHome() {
-    Get.offNamed(Routes.home);
+  void _navigateToUserSetting() {
+    box.setData(AppKeys.isFirstLaunchAppKey, false);
+    Get.toNamed(Routes.language);
   }
 
   @override
@@ -76,7 +76,7 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
           mainAxisSize: MainAxisSize.min,
           children: [
             _skipButton(),
-            const Space(value: 32),
+            const Space(value: 24),
             Expanded(child: _buildPageView()),
             AnimatedSwitcher(
               duration: AppProperties.defaultTransitionDuration,
@@ -102,10 +102,18 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
   }
 
   Widget _buildStartButton() {
-    return FilledButton(
-      onPressed: _navigateToToHome,
-      style: FilledButton.styleFrom(minimumSize: const Size(200, 40)),
-      child: Text(context.localization.getStarted),
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          right: AppProperties.contentMargin,
+        ),
+        child: FilledButton.icon(
+          onPressed: _navigateToUserSetting,
+          icon: Text(context.localization.getStarted),
+          label: const Icon(Icons.arrow_forward),
+        ),
+      ),
     );
   }
 
@@ -152,8 +160,14 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(icon),
-        const Space(value: 4),
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: context.width,
+            maxHeight: context.width * .8,
+          ),
+          child: Image.asset(icon),
+        ),
+        const Space(value: 16),
         Text(
           title,
           style: context.textTheme.headlineMedium,
@@ -163,9 +177,8 @@ class _OnboardingViewState extends State<OnboardingView> with StorageMixin {
         Text(
           des,
           textAlign: TextAlign.center,
-          style: context.textTheme.bodyLarge?.copyWith(
-            color: context.colorScheme.outline
-          ),
+          style: context.textTheme.bodyLarge
+              ?.copyWith(color: context.colorScheme.outline),
         ),
       ],
     );

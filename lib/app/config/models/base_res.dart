@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import '../common.dart';
 
 class BaseResp<T> {
   T? data;
@@ -38,7 +37,6 @@ class BaseResp<T> {
         resp.data = json as T?;
       }
     } catch (error) {
-      LogUtils.e("${T.toString()} Data parsing exception...! => $error");
       resp.data = null;
       resp.errorMsg = error.toString();
       throw FormatException;

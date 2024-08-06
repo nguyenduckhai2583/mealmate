@@ -1,39 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:mealmate/core.dart';
 
-class AccountView extends StatefulWidget {
+class AccountView extends GetView<AccountController> {
   const AccountView({super.key});
-
-  @override
-  State<AccountView> createState() => _AccountViewState();
-}
-
-class _AccountViewState extends State<AccountView>
-    with HiveMixin, StorageMixin {
-  UserInfo? userInfo;
-
-  @override
-  void initState() {
-    _listenUserInfoChange();
-    super.initState();
-  }
-
-  Future<void> _listenUserInfoChange() async {
-    userInfo = await getUserInfo();
-    setState(() {});
-    var box = await Hive.openBox<UserInfo>(AppKeys.userInfoBox);
-    box.watch(key: AppKeys.userInfoKey).listen((event) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          userInfo = event.value;
-        });
-      });
-    });
-  }
 
   void _navigate(String routes) {
     Get.toNamed(routes, arguments: UserInfoInput(navigateBack: true));
+  }
+
+  Future<void> _navigateLanguage() async {
+    await Get.toNamed(
+      Routes.language,
+      arguments: UserInfoInput(navigateBack: true),
+    );
+    controller.getLocale();
   }
 
   @override
@@ -41,58 +21,84 @@ class _AccountViewState extends State<AccountView>
     return Scaffold(
       appBar: AppBar(title: Text(context.localization.account)),
       body: DefaultPadding(
-        child: _buildUserInfo(),
+        child: _buildUserInfo(context),
       ),
     );
   }
 
-  Widget _buildUserInfo() {
-    int? weight = userInfo?.getWeight();
-    int? age = userInfo?.getAge();
-    int? height = userInfo?.getHeight();
-    String? goal = userInfo?.getFullGoal();
-    String? mc = userInfo?.getFullMedicalCondition();
+  Widget _buildUserInfo(BuildContext context) {
+    return Obx(() {
+      int? weight = controller.userInfo?.getWeight();
+      int? age = controller.userInfo?.getAge();
+      int? height = controller.userInfo?.getHeight();
+      String? goal = controller.userInfo?.getFullGoal(context);
+      String? mc = controller.userInfo?.getFullMedicalCondition(context);
 
-    return Column(
-      children: [
-        if (weight != null)
-          _infoItem(context,
+      return Column(
+        children: [
+          if (weight != null)
+            _infoItem(
+              context,
               iconData: Icons.monitor_weight_outlined,
               title: "kilogram",
               value: weight.toString(),
-              onClicked: () => _navigate(Routes.mbi)),
-        if (age != null)
-          _infoItem(context,
+              onClicked: () => _navigate(Routes.mbi),
+            ),
+          if (age != null) ...[
+            const Space(),
+            _infoItem(
+              context,
               iconData: Icons.cake_outlined,
               title: context.localization.age.toLowerCase(),
               value: age.toString(),
-              onClicked: () => _navigate(Routes.mbi)),
-        if (height != null)
-          _infoItem(
-            context,
-            iconData: Icons.settings_accessibility,
-            title: "cm",
-            value: height.toString(),
-            onClicked: () => _navigate(Routes.height),
-          ),
-        if (goal != null)
-          _infoItem(
-            context,
-            iconData: Icons.bookmark_add_outlined,
-            title: context.localization.goal.toLowerCase(),
-            value: goal.toString(),
-            onClicked: () => _navigate(Routes.goal),
-          ),
-        if (mc != null)
-          _infoItem(
-            context,
-            iconData: Icons.local_hospital_outlined,
-            title: context.localization.medicalCondition.toLowerCase(),
-            value: mc.toString(),
-            onClicked: () => _navigate(Routes.medicalCondition),
-          ),
-      ],
-    );
+              onClicked: () => _navigate(Routes.mbi),
+            )
+          ],
+          if (height != null) ...[
+            const Space(),
+            _infoItem(
+              context,
+              iconData: Icons.settings_accessibility,
+              title: "cm",
+              value: height.toString(),
+              onClicked: () => _navigate(Routes.height),
+            )
+          ],
+          if (goal.hasCharacter) ...[
+            const Space(),
+            _infoItem(
+              context,
+              iconData: Icons.bookmark_add_outlined,
+              title: context.localization.goal.toLowerCase(),
+              value: goal.toString(),
+              onClicked: () => _navigate(Routes.goal),
+            )
+          ],
+          if (mc != null) ...[
+            const Space(),
+            _infoItem(
+              context,
+              iconData: Icons.local_hospital_outlined,
+              title: context.localization.medicalCondition.toLowerCase(),
+              value: mc.toString(),
+              onClicked: () => _navigate(Routes.medicalCondition),
+            ),
+          ],
+          if (controller.currentLocal != null) ...[
+            const Space(),
+            _infoItem(
+              context,
+              iconData: Icons.language_outlined,
+              title: context.localization.language.toLowerCase(),
+              value: LocalizationService.getLanguageName(
+                controller.currentLocal!,
+              ),
+              onClicked: _navigateLanguage,
+            )
+          ]
+        ],
+      );
+    });
   }
 
   Widget _infoItem(
@@ -104,28 +110,28 @@ class _AccountViewState extends State<AccountView>
   }) {
     return InkWell(
       onTap: onClicked,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: context.colorScheme.outline),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: Row(
-          children: [
-            Icon(iconData),
-            Space.horizontal(value: 12),
-            Expanded(
-              child: Text(
-                value,
-                style: context.textTheme.bodyMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      child: Card(
+        elevation: 2,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: Row(
+            children: [
+              Icon(iconData),
+              Space.horizontal(value: 12),
+              Expanded(
+                child: Text(
+                  value,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            Space.horizontal(),
-            Text(title),
-          ],
+              Space.horizontal(),
+              Text(title),
+            ],
+          ),
         ),
       ),
     );

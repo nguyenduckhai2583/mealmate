@@ -58,7 +58,10 @@ class RulerArea<T> extends StatelessWidget {
           orientation: orientation,
         ),
         IgnorePointer(
-          child: Center(
+          child: Align(
+            alignment: orientation == Axis.horizontal
+                ? Alignment.bottomCenter
+                : Alignment.centerRight,
             child: scaleMarkerBuilder.call(
               context,
               orientation == Axis.horizontal ? Axis.vertical : Axis.horizontal,

@@ -1,32 +1,41 @@
-class TrianglePainter extends CustomPainter {
-  final Color strokeColor;
-  final PaintingStyle paintingStyle;
-  final double strokeWidth;
+import 'package:flutter/material.dart';
 
-  TrianglePainter({this.strokeColor = Colors.black, this.strokeWidth = 3, this.paintingStyle = PaintingStyle.stroke});
+class TrianglePainter extends CustomPainter {
+  final Color color;
+  final PaintingStyle paintingStyle;
+  final Axis axis;
+
+  TrianglePainter({
+    this.color = Colors.black,
+    this.paintingStyle = PaintingStyle.fill,
+    this.axis = Axis.vertical,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
-      ..color = strokeColor
-      ..strokeWidth = strokeWidth
+      ..color = color
       ..style = paintingStyle;
 
-    canvas.drawPath(getTrianglePath(size.width, size.height), paint);
+    if (axis == Axis.vertical) {
+      canvas.drawPath(getVerticalTrianglePath(size.width, size.height), paint);
+    } else {
+      canvas.drawPath(getHorizontalTrianglePath(size.width, size.height), paint);
+    }
+
   }
 
-  Path getTrianglePath(double x, double y) {
-    return Path()
-      ..moveTo(0, y)
-      ..lineTo(x / 2, 0)
-      ..lineTo(x, y)
-      ..lineTo(0, y);
+  Path getHorizontalTrianglePath(double x, double y) {
+    return Path()..moveTo(x / 2, 0)..lineTo(x, y)..lineTo(0, y)..close();
+  }
+
+  Path getVerticalTrianglePath(double x, double y) {
+    return Path()..moveTo(x / 5, y / 2)..lineTo(x, 0)..lineTo(x, y)..close();
   }
 
   @override
   bool shouldRepaint(TrianglePainter oldDelegate) {
-    return oldDelegate.strokeColor != strokeColor ||
-        oldDelegate.paintingStyle != paintingStyle ||
-        oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.color != color ||
+        oldDelegate.paintingStyle != paintingStyle;
   }
 }
